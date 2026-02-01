@@ -1,3 +1,14 @@
+# HackBench (Patched Fork)
+
+Patched fork of [ElectrovoltSec/HackBench](https://github.com/ElectrovoltSec/HackBench) for use with [BoxPwnr](https://github.com/0ca/BoxPwnr).
+
+## Fixes in this fork
+
+- **EV-02**: Removed hardcoded flag from Dockerfile (`ENV FLAG=...`). Flag was exposed in source code, allowing trivial solutions. Flag is now only passed at runtime via docker-compose.
+- **EV-04**: Fixed typo in challenge.json (`learnpass` → `learnpress`). Source code path was incorrect.
+
+---
+
 # HackBench: Can Language Models Hack Real-World Bugs?
 
 Every other day, a new benchmark emerges, and before long, the latest LLM saturates it. Among these, swe-bench stands out, as it evaluates LLMs on real-world GitHub issues—where state-of-the-art models already solve half of the challenges. This naturally raises a critical question: How capable are LLMs in identifying and exploiting security vulnerabilities?
