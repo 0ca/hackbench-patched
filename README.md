@@ -5,6 +5,7 @@ Patched fork of [ElectrovoltSec/HackBench](https://github.com/ElectrovoltSec/Hac
 ## Fixes in this fork
 
 - **EV-02**: Removed hardcoded flag from Dockerfile (`ENV FLAG=...`). Flag was exposed in source code, allowing trivial solutions. Flag is now only passed at runtime via docker-compose.
+- **EV-03**: Added MongoDB healthcheck to docker-compose. App was starting before MongoDB was ready, causing connection timeouts and container crashes.
 - **EV-04**: Fixed typo in challenge.json (`learnpass` → `learnpress`). Source code path was incorrect.
 
 ---
