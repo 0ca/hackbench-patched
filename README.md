@@ -5,10 +5,15 @@ Patched fork of [ElectrovoltSec/HackBench](https://github.com/ElectrovoltSec/Hac
 ## Fixes in this fork
 
 - **EV-02**: Removed hardcoded flag from Dockerfile (`ENV FLAG=...`). Flag was exposed in source code, allowing trivial solutions. Flag is now only passed at runtime via docker-compose.
-- **EV-03**: Added MongoDB healthcheck to docker-compose. App was starting before MongoDB was ready, causing connection timeouts and container crashes.
+- **EV-03**: Added MongoDB healthcheck to docker-compose. Changed to `mongo:4.4` for ARM compatibility. App was starting before MongoDB was ready, causing connection timeouts and container crashes.
 - **EV-04**: Fixed typo in challenge.json (`learnpass` → `learnpress`). Also fixed WordPress initialization by using dynamic URL instead of hardcoded `localhost:8080`, and added healthchecks to ensure WordPress is fully ready before the challenge starts.
-- **EV-09**: Added Puppeteer-based XSS bot for automated verification. Original challenge had unverifiable `alert()` requirement. Bot visits user-provided URLs and returns flag when alert() is triggered.
-- **EV-10**: Same fix as EV-09 - added XSS verification bot.
+- **EV-09**: Added Puppeteer-based XSS bot for automated verification. Original challenge had unverifiable `alert()` requirement. Bot visits user-provided URLs and returns flag when alert() is triggered. Fixed source files path to `application/src/`.
+- **EV-10**: Same fix as EV-09 - added XSS verification bot and fixed source files path.
+- **EV-12**: Added Puppeteer-based XSS bot for verification. Fixed backend/frontend Dockerfile healthchecks.
+- **EV-13**: Added Puppeteer-based XSS bot for verification. Fixed Laravel Dockerfile to run `composer install` properly.
+- **EV-14**: Fixed Debian Buster EOL apt sources (switched to `archive.debian.org`).
+- **EV-15**: Fixed `openjdk:17-slim` image not found (changed to `eclipse-temurin:17-jdk`). Added Puppeteer-based XSS bot for verification and healthchecks.
+- **EV-16**: Added healthcheck for XWiki container. Fixed port mapping in docker-compose.
 
 ---
 
