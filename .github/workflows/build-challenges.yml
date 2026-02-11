@@ -1,0 +1,120 @@
+name: Build All Challenges
+
+# Run on pushes to main, weekly schedule, and manual trigger
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Every Monday at 6:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  # -----------------------------------------------------------------------
+  # Job 1: Discover challenge directories under web_exploitation/
+  # -----------------------------------------------------------------------
+  discover:
+    name: Discover challenges
+    runs-on: ubuntu-latest
+    outputs:
+      challenges: ${{ steps.list.outputs.challenges }}
+      count: ${{ steps.list.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find challenge directories with docker-compose
+        id: list
+        run: |
+          # Build a JSON array of challenge objects.
+          # Each EV-XX directory under web_exploitation/ that has a
+          # docker-compose.yaml is included in the build matrix.
+          challenges='[]'
+          count=0
+
+          for dir in web_exploitation/EV-*/; do
+            # Strip trailing slash
+            dir="${dir%/}"
+            name=$(basename "$dir")
+
+            # Only include directories that have a docker-compose file
+            if [ -f "$dir/docker-compose.yaml" ] || [ -f "$dir/docker-compose.yml" ]; then
+              count=$((count + 1))
+              challenges=$(echo "$challenges" | jq \
+                --arg path "$dir" \
+                --arg name "$name" \
+                '. + [{"path": $path, "name": $name}]')
+            else
+              echo "::warning::No docker-compose file in $dir, skipping"
+            fi
+          done
+
+          echo "challenges=$(echo "$challenges" | jq -c .)" >> "$GITHUB_OUTPUT"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Found $count challenges with docker-compose files"
+
+  # -----------------------------------------------------------------------
+  # Job 2: Build each challenge in parallel using matrix strategy
+  # -----------------------------------------------------------------------
+  build:
+    name: "Build ${{ matrix.challenge.name }}"
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      # Don't cancel other builds if one fails
+      fail-fast: false
+      matrix:
+        challenge: ${{ fromJson(needs.discover.outputs.challenges) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Free up disk space - GitHub runners have limited space and Docker
+      # images can be large. Remove unused tools to make room.
+      - name: Free disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          df -h /
+
+      - name: Build challenge
+        run: |
+          CHALLENGE_DIR="${{ matrix.challenge.path }}"
+
+          echo "Challenge: ${{ matrix.challenge.name }}"
+          echo "Directory: $CHALLENGE_DIR"
+
+          cd "$CHALLENGE_DIR"
+          docker compose build
+          echo "Build completed successfully"
+
+      # Clean up Docker images to avoid filling the runner disk
+      - name: Cleanup Docker images
+        if: always()
+        run: docker system prune -af --volumes 2>/dev/null || true
+
+  # -----------------------------------------------------------------------
+  # Job 3: Summary - report overall results
+  # -----------------------------------------------------------------------
+  summary:
+    name: Build Summary
+    needs: [discover, build]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report results
+        run: |
+          echo "## Build Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Total challenges: ${{ needs.discover.outputs.count }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${{ needs.build.result }}" == "success" ]; then
+            echo "**All challenges built successfully!**" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ needs.build.result }}" == "failure" ]; then
+            echo "**Some challenges failed to build.** Check individual job logs for details." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          else
+            echo "Build result: ${{ needs.build.result }}" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
