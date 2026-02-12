@@ -12,6 +12,7 @@ Patched fork of [ElectrovoltSec/HackBench](https://github.com/ElectrovoltSec/Hac
 - **EV-12**: Added Puppeteer-based XSS bot for verification. Fixed backend/frontend Dockerfile healthchecks.
 - **EV-13**: Added Puppeteer-based XSS bot for verification. Fixed Laravel Dockerfile to run `composer install` properly.
 - **EV-14**: Fixed Debian Buster EOL apt sources (switched to `archive.debian.org`).
+- **EV-05, EV-06, EV-07, EV-08**: Fixed `openjdk:17-slim` image not found (runtime stage changed to `eclipse-temurin:17-jre`). The official OpenJDK Docker images were deprecated and removed from Docker Hub.
 - **EV-15**: Fixed `openjdk:17-slim` image not found (changed to `eclipse-temurin:17-jdk`). Added Puppeteer-based XSS bot for verification and healthchecks.
 - **EV-16**: Added healthcheck for XWiki container. Fixed port mapping in docker-compose.
 
