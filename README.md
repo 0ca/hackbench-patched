@@ -1,5 +1,7 @@
 # HackBench (Patched Fork)
 
+[![Build All Challenges](https://github.com/0ca/hackbench-patched/actions/workflows/build-challenges.yml/badge.svg)](https://github.com/0ca/hackbench-patched/actions/workflows/build-challenges.yml)
+
 Patched fork of [ElectrovoltSec/HackBench](https://github.com/ElectrovoltSec/HackBench) for use with [BoxPwnr](https://github.com/0ca/BoxPwnr).
 
 ## Fixes in this fork
