@@ -59,7 +59,7 @@ jobs:
     name: "Build ${{ matrix.challenge.name }}"
     needs: discover
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       # Don't cancel other builds if one fails
       fail-fast: false
